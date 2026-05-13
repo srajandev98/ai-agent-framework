@@ -63,6 +63,13 @@ export class AgentRuntime {
 
           const result = await tool.execute(parsedArgs);
 
+          state.memory.push({
+            id: crypto.randomUUID(),
+            type: "tool-result",
+            content: JSON.stringify(result),
+            createdAt: Date.now()
+          });
+
           state.messages.push({
             role: "tool",
             content: JSON.stringify(result),
