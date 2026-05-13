@@ -5,20 +5,31 @@ import { IRInterpreter } from "./interpreter";
 import { InstructionPass } from "./passes";
 import { LoggerPass } from "./passes/logger-pass";
 import { ExecutionSpan } from "./tracing";
+import { RuntimeHooks } from "./hooks";
 
 export class AgentRuntime {
   private interpreter = new IRInterpreter();
-
   private passes: InstructionPass[] = [new LoggerPass()];
 
   constructor(
     private model: Model,
-    private tools: Tool[]
-  ) {}
+    private tools: Tool[],
+    private hooks?: RuntimeHooks
+  ) { }
 
   async run(state: AgentState): Promise<string> {
     while (true) {
+      await this.hooks
+        ?.beforeGenerate?.(
+          state.messages
+        );
+
       const response = await this.model.generate(state.messages, this.tools);
+
+      await this.hooks
+        ?.afterGenerate?.(
+          response
+        );
 
       let instructions = this.interpreter.interpret(response.nodes);
 
@@ -55,9 +66,21 @@ export class AgentRuntime {
 
             state.spans.push(span);
 
+            await this.hooks
+              ?.beforeTool?.(
+                tool,
+                parsedArgs
+              );
+
             const result =
               await tool.execute(
                 parsedArgs
+              );
+
+            await this.hooks
+              ?.afterTool?.(
+                tool,
+                result
               );
 
             span.endedAt = Date.now();
