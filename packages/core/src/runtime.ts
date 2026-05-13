@@ -65,21 +65,12 @@ export class AgentRuntime {
         }
 
         case "tool": {
-          const tool = this.toolRegistry.get(
-            instruction.toolName
+          const parsedArgs = instruction.args;
+
+          const result = await this.toolRegistry.execute(
+            instruction.toolName,
+            parsedArgs
           );
-
-          if (!tool) {
-            throw new Error(
-              `Tool not found: ${instruction.toolName}`
-            );
-          }
-
-          const parsedArgs = tool.schema.parse(
-            instruction.args
-          );
-
-          const result = await tool.execute(parsedArgs);
 
           state.messages.push({
             role: "tool",
