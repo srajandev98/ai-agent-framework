@@ -1,8 +1,8 @@
 import { Model } from "./model";
-import { Tool } from "./tool";
 import { AgentState } from "./state";
 import { IRInterpreter } from "./interpreter";
 import { InstructionPass } from "./passes";
+import { ToolRegistry } from "./tool-registry";
 import { ExecutionSpan } from "./tracing";
 
 export class AgentRuntime {
@@ -10,11 +10,20 @@ export class AgentRuntime {
 
   constructor(
     private model: Model,
-    private tools: Tool[],
+    private toolRegistry: ToolRegistry,
     private passes: InstructionPass[] = []
-  ) { }
+  ) {}
 
-  private async step(state: AgentState): Promise<string | null> {
+  private formatMemory(state: AgentState): string {
+    return state.memory
+      .map((m) => `[${m.type}] ${m.content}`)
+      .join("\n");
+  }
+
+  private async step(
+    state: AgentState
+  ): Promise<string | null> {
+
     const stepSpan: ExecutionSpan = {
       id: crypto.randomUUID(),
       type: "step",
@@ -36,7 +45,7 @@ export class AgentRuntime {
         },
         ...state.messages
       ],
-      this.tools
+      this.toolRegistry.list()
     );
 
     let instructions = this.interpreter.interpret(
@@ -49,14 +58,15 @@ export class AgentRuntime {
 
     for (const instruction of instructions) {
       switch (instruction.type) {
+
         case "return": {
           stepSpan.endedAt = Date.now();
           return instruction.content;
         }
 
         case "tool": {
-          const tool = this.tools.find(
-            (t) => t.name === instruction.toolName
+          const tool = this.toolRegistry.get(
+            instruction.toolName
           );
 
           if (!tool) {
@@ -71,17 +81,17 @@ export class AgentRuntime {
 
           const result = await tool.execute(parsedArgs);
 
+          state.messages.push({
+            role: "tool",
+            content: JSON.stringify(result),
+            toolCallId: instruction.callId
+          });
+
           state.memory.push({
             id: crypto.randomUUID(),
             type: "tool-result",
             content: JSON.stringify(result),
             createdAt: Date.now()
-          });
-
-          state.messages.push({
-            role: "tool",
-            content: JSON.stringify(result),
-            toolCallId: instruction.callId
           });
 
           break;
@@ -104,13 +114,5 @@ export class AgentRuntime {
         return result;
       }
     }
-  }
-
-  private formatMemory(state: AgentState): string {
-    return state.memory
-      .map((m) => {
-        return `[${m.type}] ${m.content}`;
-      })
-      .join("\n");
   }
 }
