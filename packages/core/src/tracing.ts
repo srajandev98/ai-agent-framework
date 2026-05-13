@@ -1,6 +1,6 @@
 export interface ExecutionSpan {
   id: string;
-  type: string;
+  type: "tool" | "step";
   startedAt: number;
   endedAt?: number;
   metadata?: Record<string, unknown>;
