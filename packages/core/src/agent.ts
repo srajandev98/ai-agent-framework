@@ -1,6 +1,7 @@
-import { Message } from "./types";
 import { Model } from "./model";
 import { Tool } from "./tool";
+import { Message } from "./types";
+import { AgentRuntime } from "./runtime";
 
 interface AgentConfig {
   model: Model;
@@ -9,66 +10,36 @@ interface AgentConfig {
 }
 
 export class Agent {
-  private model: Model;
-  private tools: Tool[];
+  private runtime: AgentRuntime;
   private instructions?: string;
 
-  constructor(config: AgentConfig) {
-    this.model = config.model;
-    this.tools = config.tools || [];
+  constructor(private config: AgentConfig) {
+    this.runtime = new AgentRuntime(config.model, config.tools || []);
+
     this.instructions = config.instructions;
   }
 
-  async generate(input: string) {
+  async generate(input: string): Promise<string> {
     const messages: Message[] = [];
 
     if (this.instructions) {
       messages.push({
         role: "system",
-        content: this.instructions
+
+        content: this.instructions,
       });
     }
 
     messages.push({
       role: "user",
-      content: input
+
+      content: input,
     });
 
-    return this.run(messages);
-  }
+    return this.runtime.run({
+      messages,
 
-  private async run(messages: Message[]) {
-    while (true) {
-      const response =
-        await this.model.generate(messages);
-
-      messages.push(response.message);
-
-      if (!response.toolCalls?.length) {
-        return response.message.content;
-      }
-
-      for (const call of response.toolCalls) {
-        const tool = this.tools.find(
-          t => t.name === call.name
-        );
-
-        if (!tool) {
-          throw new Error(
-            `Tool not found: ${call.name}`
-          );
-        }
-
-        const result = await tool.execute(
-          call.arguments
-        );
-
-        messages.push({
-          role: "tool",
-          content: JSON.stringify(result),
-          toolCallId: call.id
-        });
-      }
-    }
+      steps: 0,
+    });
   }
 }

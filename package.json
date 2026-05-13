@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint .",
+    "format": "prettier . --write",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -18,9 +20,13 @@
   },
   "type": "module",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^25.6.2",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
     "tsup": "^8.5.1",
     "turbo": "^2.9.12",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.59.3"
   }
 }

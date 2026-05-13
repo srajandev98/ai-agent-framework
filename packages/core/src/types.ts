@@ -1,8 +1,6 @@
-export type Role =
-  | "system"
-  | "user"
-  | "assistant"
-  | "tool";
+import { AgentNode } from "./ir";
+
+export type Role = "system" | "user" | "assistant" | "tool";
 
 export interface Message {
   role: Role;
@@ -17,6 +15,5 @@ export interface ToolCall {
 }
 
 export interface LLMResponse {
-  message: Message;
-  toolCalls?: ToolCall[];
+  nodes: AgentNode[];
 }

@@ -1,7 +1,6 @@
 import { Message, LLMResponse } from "./types";
+import { Tool } from "./tool";
 
 export interface Model {
-  generate(
-    messages: Message[]
-  ): Promise<LLMResponse>;
+  generate(messages: Message[], tools?: Tool[]): Promise<LLMResponse>;
 }
