@@ -6,11 +6,15 @@
   "scripts": {
     "lint": "eslint .",
     "format": "prettier . --write",
-    "test": "vitest"
+    "test": "vitest",
+    "build": "turbo run build"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=24"
+  },
   "devEngines": {
     "packageManager": {
       "name": "pnpm",

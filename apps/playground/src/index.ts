@@ -1,6 +1,13 @@
 import "dotenv/config";
 import { z } from "zod";
-import { Agent, tool } from "@ai-agent-framework/core";
+import {
+  Agent,
+  ModelError,
+  ToolValidationError,
+  ToolNotFoundError,
+  MaxStepsExceededError,
+  tool
+} from "@ai-agent-framework/core";
 import { openai } from "@ai-agent-framework/openai";
 
 const weatherTool = tool({
@@ -30,9 +37,32 @@ async function main() {
     maxSteps: 10,
   });
 
-  const result = await agent.run("What's the weather in Delhi?");
+  try {
+    const result = await agent.run("What's the weather in Delhi?");
+    console.log(result);
+  } catch (error) {
+    if (error instanceof ToolNotFoundError) {
+      console.error("Tool lookup failed:", error.message);
+      return;
+    }
 
-  console.log(result);
+    if (error instanceof ToolValidationError) {
+      console.error("Tool arguments failed validation:", error.message);
+      return;
+    }
+
+    if (error instanceof MaxStepsExceededError) {
+      console.error("Agent stopped due to max steps:", error.message);
+      return;
+    }
+
+    if (error instanceof ModelError) {
+      console.error("Model request failed:", error.message);
+      return;
+    }
+
+    throw error;
+  }
 }
 
 main();
