@@ -38,11 +38,37 @@ export function openai(config: OpenAIConfig): Model {
                 content: m.content,
               };
 
-            case "assistant":
+            case "assistant": {
+              const assistantToolCalls = (
+                m as Message & {
+                  toolCalls?: Array<{
+                    id: string;
+                    name: string;
+                    arguments: unknown;
+                  }>;
+                }
+              ).toolCalls;
+
+              if (assistantToolCalls?.length) {
+                return {
+                  role: "assistant" as const,
+                  content: m.content || null,
+                  tool_calls: assistantToolCalls.map((call) => ({
+                    id: call.id,
+                    type: "function" as const,
+                    function: {
+                      name: call.name,
+                      arguments: JSON.stringify(call.arguments ?? {}),
+                    },
+                  })),
+                };
+              }
+
               return {
                 role: "assistant" as const,
                 content: m.content,
               };
+            }
 
             case "tool":
               return {

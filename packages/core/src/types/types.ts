@@ -6,12 +6,13 @@ export interface Message {
   role: Role;
   content: string;
   toolCallId?: string;
+  toolCalls?: ToolCall[];
 }
 
 export interface ToolCall {
   id: string;
   name: string;
-  arguments: Record<string, any>;
+  arguments: unknown;
 }
 
 export interface LLMResponse {

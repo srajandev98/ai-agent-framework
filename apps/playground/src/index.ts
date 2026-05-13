@@ -25,12 +25,12 @@ const weatherTool = tool({
 
 async function main() {
   const agent = new Agent({
-    model: openai("gpt-4o-mini"),
-
+    model: openai({ model: "gpt-4o-mini" }),
     tools: [weatherTool],
+    maxSteps: 10,
   });
 
-  const result = await agent.generate("What's the weather in Delhi?");
+  const result = await agent.run("What's the weather in Delhi?");
 
   console.log(result);
 }

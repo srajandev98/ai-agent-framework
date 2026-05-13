@@ -10,3 +10,4 @@ export * from "./ir/interpreter";
 export * from "./passes";
 export * from "./tracing/tracing";
 export * from "./agent/hooks";
+export * from "./errors/errors";
