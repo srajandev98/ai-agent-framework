@@ -26,8 +26,16 @@ export class AgentRuntime {
 
     state.spans.push(stepSpan);
 
+    const memoryContext = this.formatMemory(state);
+
     const response = await this.model.generate(
-      state.messages,
+      [
+        {
+          role: "system",
+          content: `You have access to memory:\n\n${memoryContext}`
+        },
+        ...state.messages
+      ],
       this.tools
     );
 
@@ -96,5 +104,13 @@ export class AgentRuntime {
         return result;
       }
     }
+  }
+
+  private formatMemory(state: AgentState): string {
+    return state.memory
+      .map((m) => {
+        return `[${m.type}] ${m.content}`;
+      })
+      .join("\n");
   }
 }
