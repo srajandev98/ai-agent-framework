@@ -1,19 +1,25 @@
 import OpenAI from "openai";
-
 import type {
   Model,
   Message,
-  LLMResponse
+  LLMResponse,
+  Tool
 } from "@ai-agent-framework/core";
+import { zodToJsonSchema } from "zod-to-json-schema";
 
-export function openai(modelName: string): Model {
+
+export function openai(
+  modelName: string
+): Model {
+
   const client = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
   });
 
   return {
     async generate(
-      messages: Message[]
+      messages: Message[],
+      tools?: Tool[]
     ): Promise<LLMResponse> {
 
       const response =
@@ -52,7 +58,18 @@ export function openai(modelName: string): Model {
                   `Unsupported role: ${m.role}`
                 );
             }
-          })
+          }),
+
+          tools: tools?.map((tool) => ({
+            type: "function",
+            function: {
+              name: tool.name,
+              description: tool.description,
+              parameters: zodToJsonSchema(
+                tool.schema as any
+              )
+            }
+          })),
         });
 
       const message =
@@ -62,7 +79,19 @@ export function openai(modelName: string): Model {
         message: {
           role: "assistant",
           content: message.content || ""
-        }
+        },
+
+        toolCalls: message.tool_calls
+          ?.filter(
+            (call) => call.type === "function"
+          )
+          .map((call) => ({
+            id: call.id,
+            name: call.function.name,
+            arguments: JSON.parse(
+              call.function.arguments
+            )
+          }))
       };
     }
   };
