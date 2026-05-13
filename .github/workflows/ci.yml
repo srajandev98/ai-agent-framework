@@ -9,6 +9,8 @@ on:
 jobs:
   test-and-build:
     runs-on: ubuntu-latest
+    env:
+      CI: true
 
     steps:
       - name: Checkout
@@ -25,11 +27,8 @@ jobs:
           node-version: 24
           cache: pnpm
 
-      - name: Approve build scripts
-        run: pnpm approve-builds --all
-
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --config.confirmModulesPurge=false
 
       - name: Lint
         run: pnpm lint
