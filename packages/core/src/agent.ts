@@ -15,7 +15,6 @@ export class Agent {
 
   constructor(private config: AgentConfig) {
     this.runtime = new AgentRuntime(config.model, config.tools || []);
-
     this.instructions = config.instructions;
   }
 
@@ -25,21 +24,19 @@ export class Agent {
     if (this.instructions) {
       messages.push({
         role: "system",
-
         content: this.instructions,
       });
     }
 
     messages.push({
       role: "user",
-
       content: input,
     });
 
     return this.runtime.run({
       messages,
-
       steps: 0,
+      spans: []
     });
   }
 }

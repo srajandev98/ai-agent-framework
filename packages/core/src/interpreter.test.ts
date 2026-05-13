@@ -1,45 +1,24 @@
-import {
-  describe,
-  it,
-  expect
-} from "vitest";
+import { describe, it, expect } from "vitest";
+import { IRInterpreter } from "./interpreter";
 
-import {
-  IRInterpreter
-} from "./interpreter";
+describe("IRInterpreter", () => {
+  it("converts final response nodes into return instructions", () => {
+    const interpreter = new IRInterpreter();
 
-describe(
-  "IRInterpreter",
-  () => {
+    const instructions = interpreter.interpret([
+      {
+        type: "final-response",
 
-    it(
-      "converts final response nodes into return instructions",
-      () => {
+        content: "hello",
+      },
+    ]);
 
-        const interpreter =
-          new IRInterpreter();
+    expect(instructions).toEqual([
+      {
+        type: "return",
 
-        const instructions =
-          interpreter.interpret([
-            {
-              type:
-                "final-response",
-
-              content:
-                "hello"
-            }
-          ]);
-
-        expect(
-          instructions
-        ).toEqual([
-          {
-            type: "return",
-
-            content: "hello"
-          }
-        ]);
-      }
-    );
-  }
-);
+        content: "hello",
+      },
+    ]);
+  });
+});

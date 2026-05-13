@@ -8,3 +8,4 @@ export * from "./runtime";
 export * from "./instructions";
 export * from "./interpreter";
 export * from "./passes";
+export * from "./tracing";

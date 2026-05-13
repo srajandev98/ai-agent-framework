@@ -4,6 +4,7 @@ import { AgentState } from "./state";
 import { IRInterpreter } from "./interpreter";
 import { InstructionPass } from "./passes";
 import { LoggerPass } from "./passes/logger-pass";
+import { ExecutionSpan } from "./tracing";
 
 export class AgentRuntime {
   private interpreter = new IRInterpreter();
@@ -42,13 +43,28 @@ export class AgentRuntime {
 
             const parsedArgs = tool.schema.parse(instruction.args);
 
-            const result = await tool.execute(parsedArgs);
+            const span: ExecutionSpan = {
+              id: crypto.randomUUID(),
+              type: "tool",
+              startedAt: Date.now(),
+              metadata: {
+                toolName:
+                  instruction.toolName
+              }
+            };
+
+            state.spans.push(span);
+
+            const result =
+              await tool.execute(
+                parsedArgs
+              );
+
+            span.endedAt = Date.now();
 
             state.messages.push({
               role: "tool",
-
               content: JSON.stringify(result),
-
               toolCallId: instruction.callId,
             });
 
