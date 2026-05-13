@@ -1,5 +1,5 @@
-import { AgentNode } from "./ir";
-import { Instruction } from "./instructions";
+import { AgentNode } from "../ir/ir";
+import { Instruction } from "../ir/instructions";
 
 export class IRInterpreter {
   interpret(nodes: AgentNode[]): Instruction[] {

@@ -1,4 +1,4 @@
-import { AgentNode } from "./ir";
+import { AgentNode } from "../ir/ir";
 
 export type Role = "system" | "user" | "assistant" | "tool";
 

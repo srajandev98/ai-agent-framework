@@ -1,6 +1,6 @@
-import { InstructionPass } from "../passes";
-import { Instruction } from "../instructions";
-import { AgentState } from "../state";
+import { InstructionPass } from ".";
+import { Instruction } from "../ir/instructions";
+import { AgentState } from "../state/state";
 
 export class LoggerPass implements InstructionPass {
   async run(

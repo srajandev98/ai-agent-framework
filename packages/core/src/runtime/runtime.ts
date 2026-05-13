@@ -1,9 +1,9 @@
-import { Model } from "./model";
-import { AgentState } from "./state";
-import { IRInterpreter } from "./interpreter";
-import { InstructionPass } from "./passes";
-import { ToolRegistry } from "./tool-registry";
-import { ExecutionSpan } from "./tracing";
+import { Model } from "../model/model";
+import { AgentState } from "../state/state";
+import { IRInterpreter } from "../ir/interpreter";
+import { InstructionPass } from "../passes";
+import { ToolRegistry } from "../tools/tool-registry";
+import { ExecutionSpan } from "../tracing/tracing";
 
 export class AgentRuntime {
   private interpreter = new IRInterpreter();
