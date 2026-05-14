@@ -1,6 +1,27 @@
-# Core Runtime Contract (v0)
+# Core Runtime Contract (v0.1.0-mvp)
 
 This document defines the current expected behavior for `@ai-agent-framework/core`.
+
+## Runnable API
+
+- `Runnable<I, O>` exposes:
+  - `invoke(input: I): Promise<O>`
+  - `pipe(next): Runnable<I, NextOutput>`
+- `RunnableLambda` wraps sync/async functions into runnable units.
+- `RunnableSequence` composes runnables in order.
+- `RunnableParallel` runs multiple branches with the same input and returns a merged object output.
+- `ModelRunnable` adapts `Model.generate(...)` into a `string -> string` runnable path and expects a `final-response` node.
+
+## Prompt API
+
+- `PromptTemplate<{...vars}>` formats string templates with `{variable}` placeholders.
+- Missing template variables throw `PromptTemplateError`.
+
+## Output Parser API
+
+- `StringOutputParser`: pass-through parser for raw model text.
+- `JsonOutputParser<T>`: parses JSON text into typed output.
+- Invalid JSON throws `OutputParserError`.
 
 ## Agent API
 
@@ -41,6 +62,8 @@ This ordering is required so provider adapters can continue tool loops correctly
 - Invalid tool arguments: `ToolValidationError`
 - Model/provider failure: `ModelError` with `cause`
 - Exceeded configured step limit: `MaxStepsExceededError`
+- Prompt variable formatting failure: `PromptTemplateError`
+- Output parsing failure: `OutputParserError`
 
 ## Default limits
 

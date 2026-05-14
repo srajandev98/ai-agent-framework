@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { RunnableLambda } from "./runnable-lambda";
 import { RunnableParallel } from "./runnable-parallel";
+import { RunnablePassthrough } from "./runnable-passthrough";
+import { RunnableMap } from "./runnable-map";
 
 describe("Runnable", () => {
   it("invokes a runnable lambda", async () => {
@@ -88,5 +90,62 @@ describe("Runnable", () => {
     await expect(parallel.invoke(1)).rejects.toThrow(
       "parallel branch failed"
     );
+  });
+
+  it("returns the same input with RunnablePassthrough", async () => {
+    const passthrough = new RunnablePassthrough<{
+      topic: string;
+      score: number;
+    }>();
+
+    const input = {
+      topic: "agents",
+      score: 10
+    };
+
+    await expect(passthrough.invoke(input)).resolves.toBe(input);
+  });
+
+  it("composes RunnablePassthrough with downstream runnable", async () => {
+    const passthrough = new RunnablePassthrough<{ topic: string }>();
+
+    const pickTopic = new RunnableLambda<{ topic: string }, string>(
+      (value) => value.topic
+    );
+
+    const chain = passthrough.pipe(pickTopic);
+
+    await expect(chain.invoke({ topic: "frameworks" })).resolves.toBe(
+      "frameworks"
+    );
+  });
+
+  it("builds object output with RunnableMap", async () => {
+    const map = new RunnableMap<string, {
+      length: number;
+      uppercase: string;
+    }>({
+      length: new RunnableLambda<string, number>((value) => value.length),
+      uppercase: new RunnableLambda<string, string>((value) => value.toUpperCase())
+    });
+
+    await expect(map.invoke("agent")).resolves.toEqual({
+      length: 5,
+      uppercase: "AGENT"
+    });
+  });
+
+  it("propagates errors from RunnableMap fields", async () => {
+    const map = new RunnableMap<string, {
+      ok: string;
+      fail: string;
+    }>({
+      ok: new RunnableLambda<string, string>((value) => value),
+      fail: new RunnableLambda<string, string>(() => {
+        throw new Error("map field failed");
+      })
+    });
+
+    await expect(map.invoke("x")).rejects.toThrow("map field failed");
   });
 });
