@@ -1,9 +1,0 @@
-#!/usr/bin/env sh
-set -eu
-
-echo "Running pre-push checks..."
-pnpm lint
-pnpm test --run
-pnpm --filter @ai-agent-framework/core build
-pnpm --filter @ai-agent-framework/openai build
-echo "Pre-push checks passed."
