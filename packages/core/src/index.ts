@@ -11,3 +11,7 @@ export * from "./passes";
 export * from "./tracing/tracing";
 export * from "./agent/hooks";
 export * from "./errors/errors";
+export * from "./workflows/workflow";
+export * from "./runnables";
+export * from "./prompts";
+export * from "./output-parsers";

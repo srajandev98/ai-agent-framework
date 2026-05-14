@@ -25,3 +25,17 @@ export class MaxStepsExceededError extends Error {
     this.name = "MaxStepsExceededError";
   }
 }
+
+export class PromptTemplateError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "PromptTemplateError";
+  }
+}
+
+export class OutputParserError extends Error {
+  constructor(message: string, cause?: unknown) {
+    super(message, cause ? { cause } : undefined);
+    this.name = "OutputParserError";
+  }
+}
