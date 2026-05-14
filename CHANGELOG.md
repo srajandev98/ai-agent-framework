@@ -11,6 +11,8 @@ Initial MVP release focused on composable chains and a stable agent core.
   - `RunnableLambda`
   - `RunnableSequence`
   - `RunnableParallel`
+  - `RunnablePassthrough`
+  - `RunnableMap`
   - `ModelRunnable`
 - Prompt primitive:
   - `PromptTemplate`
@@ -35,6 +37,7 @@ Initial MVP release focused on composable chains and a stable agent core.
   - formatting
   - parse success/failure
   - runnable composition
+  - model runnable final-response expectations
 
 ### Changed
 
@@ -44,8 +47,13 @@ Initial MVP release focused on composable chains and a stable agent core.
 - Tool execution now validates args through Zod schema before execution.
 - Model/provider failures are wrapped as `ModelError`.
 - Runtime enforces `maxSteps`.
+- Prompt and parser errors are centralized in shared errors:
+  - `PromptTemplateError`
+  - `OutputParserError`
 
 ### Docs
 
 - Added `README.md` with runnable and agent quickstarts.
 - Expanded `CORE_CONTRACT.md` to document runnable, prompt, parser, and agent contracts.
+- Updated runnable quickstart to show richer chain composition:
+  - `RunnableMap -> PromptTemplate -> ModelRunnable -> JsonOutputParser`
