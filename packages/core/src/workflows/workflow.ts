@@ -26,10 +26,10 @@ export type StepCondition<TData> = (
   data: TData
 ) => Promise<boolean> | boolean;
 
-export interface WorkflowStep<TInput = unknown, TOutput = unknown> {
+export interface WorkflowStep<TInput = any, TOutput = any> {
   id: string;
   run: StepHandler<TInput, TOutput>;
-  when?: StepCondition<unknown>;
+  when?: StepCondition<any>;
 }
 
 export interface WorkflowConfig {

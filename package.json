@@ -7,7 +7,8 @@
     "lint": "eslint .",
     "format": "prettier . --write",
     "test": "vitest",
-    "build": "turbo run build"
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p packages/core/tsconfig.json --noEmit && tsc -p packages/providers/openai/tsconfig.json --noEmit",
+    "build": "pnpm --filter @ai-agent-framework/core build && pnpm --filter @ai-agent-framework/openai build"
   },
   "keywords": [],
   "author": "",

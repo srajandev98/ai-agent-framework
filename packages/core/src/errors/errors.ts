@@ -1,41 +1,62 @@
-export class ToolNotFoundError extends Error {
+export type FrameworkErrorCode =
+  | "AIFW_TOOL_NOT_FOUND"
+  | "AIFW_TOOL_VALIDATION_ERROR"
+  | "AIFW_MODEL_ERROR"
+  | "AIFW_MAX_STEPS_EXCEEDED"
+  | "AIFW_PROMPT_TEMPLATE_ERROR"
+  | "AIFW_OUTPUT_PARSER_ERROR";
+
+class FrameworkError extends Error {
+  readonly code: FrameworkErrorCode;
+
+  constructor(name: string, code: FrameworkErrorCode, message: string, cause?: unknown) {
+    super(message, cause === undefined ? undefined : { cause });
+    this.name = name;
+    this.code = code;
+  }
+}
+
+export class ToolNotFoundError extends FrameworkError {
   constructor(toolName: string) {
-    super(`Tool not found: ${toolName}`);
-    this.name = "ToolNotFoundError";
+    super("ToolNotFoundError", "AIFW_TOOL_NOT_FOUND", `Tool not found: ${toolName}`);
   }
 }
 
-export class ToolValidationError extends Error {
+export class ToolValidationError extends FrameworkError {
   constructor(toolName: string, cause: unknown) {
-    super(`Invalid arguments for tool: ${toolName}`, { cause });
-    this.name = "ToolValidationError";
+    super(
+      "ToolValidationError",
+      "AIFW_TOOL_VALIDATION_ERROR",
+      `Invalid arguments for tool: ${toolName}`,
+      cause
+    );
   }
 }
 
-export class ModelError extends Error {
+export class ModelError extends FrameworkError {
   constructor(message: string, cause: unknown) {
-    super(message, { cause });
-    this.name = "ModelError";
+    super("ModelError", "AIFW_MODEL_ERROR", message, cause);
   }
 }
 
-export class MaxStepsExceededError extends Error {
+export class MaxStepsExceededError extends FrameworkError {
   constructor(maxSteps: number) {
-    super(`Agent exceeded max steps: ${maxSteps}`);
-    this.name = "MaxStepsExceededError";
+    super(
+      "MaxStepsExceededError",
+      "AIFW_MAX_STEPS_EXCEEDED",
+      `Agent exceeded max steps: ${maxSteps}`
+    );
   }
 }
 
-export class PromptTemplateError extends Error {
+export class PromptTemplateError extends FrameworkError {
   constructor(message: string) {
-    super(message);
-    this.name = "PromptTemplateError";
+    super("PromptTemplateError", "AIFW_PROMPT_TEMPLATE_ERROR", message);
   }
 }
 
-export class OutputParserError extends Error {
+export class OutputParserError extends FrameworkError {
   constructor(message: string, cause?: unknown) {
-    super(message, cause ? { cause } : undefined);
-    this.name = "OutputParserError";
+    super("OutputParserError", "AIFW_OUTPUT_PARSER_ERROR", message, cause);
   }
 }

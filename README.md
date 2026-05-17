@@ -119,11 +119,11 @@ Common framework errors:
 
 ```bash
 pnpm lint
+pnpm typecheck
 pnpm test --run
-pnpm --filter @ai-agent-framework/core build
-pnpm --filter @ai-agent-framework/openai build
+pnpm build
 ```
 
 ## Notes
 
-Detailed runtime behavior is documented in `CORE_CONTRACT.md`.
+Framework docs are maintained in `srajangupta.github.io/projects/ai-agent-framework/_docusaurus`.

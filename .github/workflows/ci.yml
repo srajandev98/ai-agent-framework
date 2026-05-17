@@ -33,11 +33,11 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Typecheck
+        run: pnpm typecheck
+
       - name: Test
         run: pnpm test --run
 
-      - name: Build core
-        run: pnpm --filter @ai-agent-framework/core build
-
-      - name: Build openai provider
-        run: pnpm --filter @ai-agent-framework/openai build
+      - name: Build
+        run: pnpm build
