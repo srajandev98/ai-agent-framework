@@ -31,6 +31,42 @@ function scriptedModel(
 }
 
 describe("Agent runtime contract", () => {
+  it("prepends a configured system prompt before the user message", async () => {
+    const model = scriptedModel([
+      (messages) => {
+        expect(messages[0]).toEqual({
+          role: "system",
+          content: "You have access to memory:\n\n"
+        });
+        expect(messages[1]).toEqual({
+          role: "system",
+          content: "You are a concise assistant."
+        });
+        expect(messages[2]).toEqual({
+          role: "user",
+          content: "hi"
+        });
+
+        return {
+          nodes: [
+            {
+              type: "final-response",
+              content: "hello"
+            }
+          ]
+        };
+      }
+    ]);
+
+    const agent = new Agent({
+      model,
+      tools: [],
+      systemPrompt: "You are a concise assistant."
+    });
+
+    await expect(agent.run("hi")).resolves.toBe("hello");
+  });
+
   it("returns final response when model emits final-response node", async () => {
     const model = scriptedModel([
       () => ({
@@ -199,6 +235,68 @@ describe("Agent runtime contract", () => {
     } catch (error) {
       expect(error).toBeInstanceOf(ModelError);
       expect((error as ModelError).cause).toBe(rootCause);
+    }
+  });
+
+  it("retries model generation and succeeds before max attempts", async () => {
+    let attempts = 0;
+
+    const model: Model = {
+      async generate() {
+        attempts++;
+
+        if (attempts < 3) {
+          throw new Error(`temporary failure ${attempts}`);
+        }
+
+        return {
+          nodes: [
+            {
+              type: "final-response",
+              content: "recovered"
+            }
+          ]
+        };
+      }
+    };
+
+    const agent = new Agent({
+      model,
+      tools: [],
+      runtimePolicy: {
+        modelRetry: {
+          maxAttempts: 3,
+          backoffMs: 1
+        }
+      }
+    });
+
+    await expect(agent.run("hi")).resolves.toBe("recovered");
+    expect(attempts).toBe(3);
+  });
+
+  it("fails with ModelError when model times out", async () => {
+    const model: Model = {
+      async generate() {
+        return await new Promise<LLMResponse>(() => {});
+      }
+    };
+
+    const agent = new Agent({
+      model,
+      tools: [],
+      runtimePolicy: {
+        modelTimeoutMs: 10
+      }
+    });
+
+    try {
+      await agent.run("hi");
+      throw new Error("Expected agent.run to throw");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ModelError);
+      expect((error as ModelError).cause).toBeInstanceOf(Error);
+      expect(((error as ModelError).cause as Error).message).toContain("timed out");
     }
   });
 });

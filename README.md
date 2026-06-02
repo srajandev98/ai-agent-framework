@@ -7,7 +7,7 @@ TypeScript framework for building AI chains and agents with composable primitive
 - Runnables: `RunnableLambda`, `RunnableSequence`, `RunnableParallel`, `ModelRunnable`
 - Prompts: `PromptTemplate`
 - Output parsers: `StringOutputParser`, `JsonOutputParser`
-- Agent runtime with tool calling and memory loop
+- Agent runtime with tool calling, memory loop, and optional system prompts
 - OpenAI provider adapter
 
 ## Requirements

@@ -23,9 +23,10 @@ Build `ai-agent-framework` into a production-grade, provider-agnostic framework 
 - Secure-by-default configuration.
 
 ## Current State (MVP)
-- Core runnables, prompts, parsers, agent loop, tool execution.
-- OpenAI adapter.
-- Basic tests and playground.
+- ~~Core runnables, prompts, parsers, agent loop, tool execution.~~
+- Agent runtime now supports optional system prompts.
+- ~~OpenAI adapter.~~
+- ~~Basic tests and playground.~~
 
 ## Target Capabilities
 - Multi-provider model and embedding adapters.
@@ -42,14 +43,14 @@ Goals:
 - Freeze and document core contracts before broad feature growth.
 
 Deliverables:
-- Versioned API contracts (`CORE_CONTRACT.md` -> versioned docs).
-- RFC process for breaking changes.
-- Error taxonomy finalization and error code catalog.
-- Strict TypeScript, lint, format, and test standards across workspace.
+- ~~Versioned API contracts (`CORE_CONTRACT.md` -> versioned docs).~~
+- ~~RFC process for breaking changes.~~
+- ~~Error taxonomy finalization and error code catalog.~~
+- ~~Strict TypeScript, lint, format, and test standards across workspace.~~
 
 Exit Criteria:
-- All public APIs documented with examples.
-- CI blocks merges on type/lint/test failures.
+- ~~All public APIs documented with examples.~~
+- ~~CI blocks merges on type/lint/test failures.~~
 
 ## Phase 1: Core Runtime Reliability (Weeks 3-6)
 Goals:
@@ -161,9 +162,9 @@ Exit Criteria:
 
 ## Engineering Standards
 - Required checks in CI:
-  - `pnpm lint`
-  - `pnpm test --run`
-  - `pnpm build`
+  - ~~`pnpm lint`~~
+  - ~~`pnpm test --run`~~
+  - ~~`pnpm build`~~
   - security scan
   - dependency/license policy checks
 - PR requirements:
@@ -197,7 +198,7 @@ Exit Criteria:
 1. Finalize v0.2 contract updates and publish API docs.
 2. Add runtime retries/timeouts/cancellation and tests.
 3. Implement OTel trace skeleton and structured logs.
-4. Stand up CI gates and baseline quality checks.
+4. ~~Stand up CI gates and baseline quality checks.~~
 5. Draft first RFCs: provider interface, memory interface, policy engine.
 
 ## Risks and Mitigations

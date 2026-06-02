@@ -5,8 +5,18 @@ import { InstructionPass } from "../passes";
 import { ToolRegistry } from "../tools/tool-registry";
 import { ExecutionSpan } from "../tracing/tracing";
 import { ModelError, MaxStepsExceededError } from "../errors/errors";
-import { LLMResponse } from "../types/types";
+import { Message, LLMResponse } from "../types/types";
 import { randomUUID } from "node:crypto";
+
+export interface RetryConfig {
+  maxAttempts?: number;
+  backoffMs?: number;
+}
+
+export interface RuntimePolicy {
+  modelTimeoutMs?: number;
+  modelRetry?: RetryConfig;
+}
 
 export class AgentRuntime {
   private interpreter = new IRInterpreter();
@@ -15,8 +25,53 @@ export class AgentRuntime {
     private model: Model,
     private toolRegistry: ToolRegistry,
     private passes: InstructionPass[] = [],
-    private maxSteps: number = 20
+    private maxSteps: number = 20,
+    private policy: RuntimePolicy = {}
   ) {}
+
+  private async sleep(ms: number): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private async withTimeout<T>(
+    operation: Promise<T>,
+    timeoutMs?: number
+  ): Promise<T> {
+    if (!timeoutMs || timeoutMs <= 0) {
+      return operation;
+    }
+
+    const timeoutPromise = new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error(`Operation timed out after ${timeoutMs}ms`)), timeoutMs);
+    });
+
+    return Promise.race([operation, timeoutPromise]);
+  }
+
+  private async generateWithPolicy(
+    messages: Message[]
+  ): Promise<LLMResponse> {
+    const maxAttempts = this.policy.modelRetry?.maxAttempts ?? 1;
+    const backoffMs = this.policy.modelRetry?.backoffMs ?? 0;
+    let lastError: unknown;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        return await this.withTimeout(
+          this.model.generate(messages, this.toolRegistry.list()),
+          this.policy.modelTimeoutMs
+        );
+      } catch (error) {
+        lastError = error;
+
+        if (attempt < maxAttempts && backoffMs > 0) {
+          await this.sleep(backoffMs * attempt);
+        }
+      }
+    }
+
+    throw new ModelError("Model generation failed", lastError);
+  }
 
   private formatMemory(state: AgentState): string {
     return state.memory
@@ -41,22 +96,13 @@ export class AgentRuntime {
 
     const memoryContext = this.formatMemory(state);
 
-    let response: LLMResponse;
-
-    try {
-      response = await this.model.generate(
-        [
-          {
-            role: "system",
-            content: `You have access to memory:\n\n${memoryContext}`
-          },
-          ...state.messages
-        ],
-        this.toolRegistry.list()
-      );
-    } catch (error) {
-      throw new ModelError("Model generation failed", error);
-    }
+    const response = await this.generateWithPolicy([
+      {
+        role: "system",
+        content: `You have access to memory:\n\n${memoryContext}`
+      },
+      ...state.messages
+    ]);
 
     let instructions = this.interpreter.interpret(
       response.nodes
