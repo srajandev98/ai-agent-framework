@@ -17,6 +17,12 @@ Why this change is needed now.
 
 Describe APIs, behavior, data model, and operational impact.
 
+## Compatibility Notes
+
+- Public APIs affected:
+- Config or environment changes:
+- Migration steps:
+
 ## Alternatives Considered
 
 List alternatives and why they were not chosen.

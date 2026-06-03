@@ -5,6 +5,13 @@ Use RFCs for:
 - breaking API or behavior changes
 - contract updates
 - major architecture shifts
+- additions that affect public developer experience or migration paths
+
+Do not require an RFC for:
+
+- typo fixes
+- small internal refactors
+- routine dependency bumps
 
 ## Workflow
 
